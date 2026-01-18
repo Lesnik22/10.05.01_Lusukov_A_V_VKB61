@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Алерты безопасности - Админ панель{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <h2 class="mb-0"><i class="fas fa-bell"></i> Алерты безопасности</h2>
+            <div class="d-flex align-items-center gap-2">
+                <a href="{{ url_for('admin_panel') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Назад к админ панели
+                </a>
+                <span class="badge bg-danger">Администратор</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Форма создания алерта -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-plus-circle"></i> Создать новый алерт</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin_create_alert') }}">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="name" class="form-label">Название алерта *</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="event_type" class="form-label">Тип события</label>
+                            <select class="form-select" id="event_type" name="event_type">
+                                <option value="">Любой тип</option>
+                                <option value="suspicious_login">Подозрительный вход</option>
+                                <option value="virus_detected">Обнаружен вирус</option>
+                                <option value="blocked_download">Блокированная загрузка</option>
+                                <option value="security_alert">Алерт безопасности</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="severity" class="form-label">Уровень</label>
+                            <select class="form-select" id="severity" name="severity">
+                                <option value="">Любой уровень</option>
+                                <option value="low">Низкий</option>
+                                <option value="medium">Средний</option>
+                                <option value="high">Высокий</option>
+                                <option value="critical">Критический</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="condition" class="form-label">Условие</label>
+                            <select class="form-select" id="condition" name="condition">
+                                <option value="count_per_hour">Событий в час</option>
+                                <option value="count_per_day">Событий в день</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="threshold" class="form-label">Порог</label>
+                            <input type="number" class="form-control" id="threshold" name="threshold" value="5" min="1">
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-check mt-4">
+                                <input class="form-check-input" type="checkbox" id="enabled" name="enabled" checked>
+                                <label class="form-check-label" for="enabled">Включен</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-check mt-4">
+                                <input class="form-check-input" type="checkbox" id="notify_admins" name="notify_admins" checked>
+                                <label class="form-check-label" for="notify_admins">Уведомлять админов</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary mt-4">
+                                <i class="fas fa-plus"></i> Создать алерт
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Список алертов -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-bell"></i> Настроенные алерты</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Название</th>
+                                <th>Тип события</th>
+                                <th>Уровень</th>
+                                <th>Условие</th>
+                                <th>Порог</th>
+                                <th>Статус</th>
+                                <th>Последний срабатывание</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for alert in alerts %}
+                            <tr>
+                                <td><strong>{{ alert.name }}</strong></td>
+                                <td>{{ alert.event_type or 'Любой' }}</td>
+                                <td>{{ alert.severity or 'Любой' }}</td>
+                                <td>{{ alert.condition }}</td>
+                                <td>{{ alert.threshold }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if alert.enabled else 'secondary' }}">
+                                        {{ 'Включен' if alert.enabled else 'Выключен' }}
+                                    </span>
+                                </td>
+                                <td>{{ alert.last_triggered.strftime('%d.%m.%Y %H:%M') if alert.last_triggered else 'Никогда' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                {% if not alerts %}
+                <div class="alert alert-info mb-0">
+                    <i class="fas fa-info-circle"></i> Алерты не настроены
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

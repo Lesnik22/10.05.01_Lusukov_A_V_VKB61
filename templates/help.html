@@ -1,0 +1,330 @@
+{% extends "base.html" %}
+
+{% block title %}Помощь - Безопасная система обмена файлами{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-primary">
+                <i class="fas fa-question-circle"></i> Помощь и FAQ
+            </h1>
+            <p class="lead">Ответы на часто задаваемые вопросы</p>
+        </div>
+
+        <!-- Быстрый старт -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-rocket"></i> Быстрый старт</h4>
+            </div>
+            <div class="card-body">
+                <ol class="lead">
+                    <li class="mb-2">Зарегистрируйтесь и выберите свой отдел</li>
+                    <li class="mb-2">Войдите в систему</li>
+                    <li class="mb-2">Настройте MFA для дополнительной безопасности</li>
+                    <li class="mb-2">Загрузите файлы и выберите уровень доступа</li>
+                    <li class="mb-2">Делитесь файлами с коллегами</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- FAQ -->
+        <div class="accordion" id="faqAccordion">
+            <!-- Вопрос 1 -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                        <i class="fas fa-question-circle text-primary me-2"></i>
+                        Как загрузить файл?
+                    </button>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        <ol>
+                            <li>Перейдите на главную панель (Dashboard)</li>
+                            <li>В секции "Загрузить файл" нажмите "Выберите файл"</li>
+                            <li>Выберите уровень доступа:
+                                <ul>
+                                    <li><strong>Приватный</strong> - только вы</li>
+                                    <li><strong>Отдел</strong> - коллеги из вашего отдела</li>
+                                    <li><strong>Публичный</strong> - все пользователи</li>
+                                </ul>
+                            </li>
+                            <li>При выборе "Отдел" укажите название отдела</li>
+                            <li>Нажмите "Загрузить"</li>
+                        </ol>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            Максимальный размер файла: <strong>100MB</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вопрос 2 -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingTwo">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                        <i class="fas fa-question-circle text-primary me-2"></i>
+                        Как настроить MFA?
+                    </button>
+                </h2>
+                <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        <ol>
+                            <li>Войдите в систему</li>
+                            <li>Нажмите на свое имя пользователя в правом верхнем углу</li>
+                            <li>Выберите "Настройка MFA"</li>
+                            <li>Отсканируйте QR-код в приложении аутентификатора</li>
+                            <li>Введите 6-значный код для подтверждения</li>
+                        </ol>
+                        <p><strong>Рекомендуемые приложения:</strong></p>
+                        <ul>
+                            <li>Google Authenticator (Android/iOS)</li>
+                            <li>Microsoft Authenticator (Android/iOS)</li>
+                            <li>Authy (Android/iOS/Desktop)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вопрос 3 -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingThree">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                        <i class="fas fa-question-circle text-primary me-2"></i>
+                        Как предоставить доступ к файлу?
+                    </button>
+                </h2>
+                <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        <p><strong>Для приватных файлов:</strong></p>
+                        <ol>
+                            <li>Найдите файл в таблице "Мои файлы"</li>
+                            <li>Нажмите кнопку "Поделиться" (зеленая иконка)</li>
+                            <li>Введите имя пользователя</li>
+                            <li>Выберите уровень разрешения:
+                                <ul>
+                                    <li><strong>Только чтение</strong> - может скачать</li>
+                                    <li><strong>Чтение и запись</strong> - может изменять</li>
+                                    <li><strong>Полный доступ</strong> - может удалять</li>
+                                </ul>
+                            </li>
+                            <li>Нажмите "Предоставить доступ"</li>
+                        </ol>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Примечание:</strong> Для публичных файлов предоставление доступа не требуется - 
+                            они автоматически доступны всем пользователям.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вопрос 4 -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingFour">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">
+                        <i class="fas fa-question-circle text-primary me-2"></i>
+                        Как работает система отделов?
+                    </button>
+                </h2>
+                <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        <p>
+                            Система отделов позволяет автоматически предоставлять доступ к файлам коллегам из вашего отдела.
+                        </p>
+                        <p><strong>Как это работает:</strong></p>
+                        <ul>
+                            <li>При регистрации выберите свой отдел (IT, HR, Finance и т.д.)</li>
+                            <li>При загрузке файла выберите уровень доступа "Отдел"</li>
+                            <li>Укажите отдел для файла</li>
+                            <li>Все пользователи этого отдела автоматически увидят файл</li>
+                        </ul>
+                        <div class="alert alert-success">
+                            <i class="fas fa-lightbulb"></i>
+                            <strong>Совет:</strong> Используйте уровень "Отдел" для документов, которые должны быть 
+                            доступны всей команде без необходимости предоставлять доступ каждому пользователю отдельно.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вопрос 5 -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingFive">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive">
+                        <i class="fas fa-question-circle text-primary me-2"></i>
+                        Как удалить файл?
+                    </button>
+                </h2>
+                <div id="collapseFive" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        <p><strong>Для владельца файла:</strong></p>
+                        <ol>
+                            <li>Найдите файл в таблице "Мои файлы"</li>
+                            <li>Нажмите красную кнопку "Удалить"</li>
+                            <li>Подтвердите действие</li>
+                        </ol>
+                        <p><strong>Для администратора:</strong></p>
+                        <ol>
+                            <li>Перейдите в "Админ панель"</li>
+                            <li>В разделе "Файлы" найдите нужный файл</li>
+                            <li>Нажмите красную кнопку "Удалить"</li>
+                            <li>Подтвердите действие</li>
+                        </ol>
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Внимание:</strong> Удаление файла необратимо! Файл будет полностью удален 
+                            из системы и с диска.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вопрос 6 -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingSix">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix">
+                        <i class="fas fa-question-circle text-primary me-2"></i>
+                        Что делать, если забыл пароль?
+                    </button>
+                </h2>
+                <div id="collapseSix" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        <p>Обратитесь к администратору системы для сброса пароля.</p>
+                        <p><strong>Администратор может:</strong></p>
+                        <ul>
+                            <li>Перейти в "Админ панель"</li>
+                            <li>Найти вашего пользователя</li>
+                            <li>Нажать "Редактировать"</li>
+                            <li>Установить новый пароль</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вопрос 7 -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingSeven">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSeven">
+                        <i class="fas fa-question-circle text-primary me-2"></i>
+                        Безопасны ли мои файлы?
+                    </button>
+                </h2>
+                <div id="collapseSeven" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        <p><strong>Да, ваши файлы защищены несколькими уровнями безопасности:</strong></p>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Шифрование:</h6>
+                                <ul>
+                                    <li>Все файлы шифруются при загрузке</li>
+                                    <li>Используется AES-128</li>
+                                    <li>Расшифровка только при скачивании</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Контроль доступа:</h6>
+                                <ul>
+                                    <li>Ролевая модель доступа</li>
+                                    <li>Явное предоставление прав</li>
+                                    <li>Полный аудит действий</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="alert alert-success mt-3">
+                            <i class="fas fa-shield-alt"></i>
+                            <strong>Гарантия:</strong> Даже при физическом доступе к серверу файлы остаются 
+                            зашифрованными и недоступными для чтения.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Контакты поддержки -->
+        <div class="card mt-5">
+            <div class="card-header">
+                <h4><i class="fas fa-headset"></i> Нужна помощь?</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center mb-3">
+                        <i class="fas fa-user-tie fa-3x text-primary mb-3"></i>
+                        <h5>Администратор</h5>
+                        <p>Обратитесь к администратору системы для решения технических вопросов</p>
+                    </div>
+                    <div class="col-md-4 text-center mb-3">
+                        <i class="fas fa-book fa-3x text-success mb-3"></i>
+                        <h5>Документация</h5>
+                        <p>Подробная документация доступна в файле DOCUMENTATION.md</p>
+                    </div>
+                    <div class="col-md-4 text-center mb-3">
+                        <i class="fas fa-graduation-cap fa-3x text-warning mb-3"></i>
+                        <h5>Обучение</h5>
+                        <p>Краткое руководство в файле QUICK_START.md</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Полезные советы -->
+        <div class="card mt-4 mb-4">
+            <div class="card-header">
+                <h4><i class="fas fa-lightbulb"></i> Полезные советы</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-check text-success"></i> Рекомендуется:</h5>
+                        <ul>
+                            <li>Включите MFA для дополнительной безопасности</li>
+                            <li>Используйте уровень "Отдел" для командной работы</li>
+                            <li>Регулярно проверяйте доступ к вашим файлам</li>
+                            <li>Используйте понятные имена файлов</li>
+                            <li>Удаляйте ненужные файлы</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-times text-danger"></i> Не рекомендуется:</h5>
+                        <ul>
+                            <li>Использовать слабые пароли</li>
+                            <li>Делиться учетными данными</li>
+                            <li>Загружать файлы размером более 100MB</li>
+                            <li>Использовать "Публичный" для конфиденциальных данных</li>
+                            <li>Игнорировать настройку MFA</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5">
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-tachometer-alt"></i> К панели управления
+            </a>
+            {% else %}
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg me-2">
+                <i class="fas fa-user-plus"></i> Зарегистрироваться
+            </a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-sign-in-alt"></i> Войти
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+

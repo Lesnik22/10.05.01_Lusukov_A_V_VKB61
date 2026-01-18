@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}Безопасность - Безопасная система обмена файлами{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-primary">
+                <i class="fas fa-shield-alt"></i> Безопасность
+            </h1>
+            <p class="lead">Многоуровневая защита ваших данных</p>
+        </div>
+
+        <!-- Уровни безопасности -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-layer-group"></i> Уровни защиты</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="text-center">
+                            <div class="mb-3">
+                                <i class="fas fa-key fa-4x text-primary"></i>
+                            </div>
+                            <h5>1. Аутентификация</h5>
+                            <p class="text-muted">Надежные пароли + MFA</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="text-center">
+                            <div class="mb-3">
+                                <i class="fas fa-lock fa-4x text-success"></i>
+                            </div>
+                            <h5>2. Шифрование</h5>
+                            <p class="text-muted">AES-128 для всех файлов</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="text-center">
+                            <div class="mb-3">
+                                <i class="fas fa-user-shield fa-4x text-warning"></i>
+                            </div>
+                            <h5>3. Контроль доступа</h5>
+                            <p class="text-muted">RBAC + система отделов</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Многофакторная аутентификация -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4><i class="fas fa-mobile-alt"></i> Многофакторная аутентификация (MFA)</h4>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5>Двойная защита вашего аккаунта</h5>
+                        <p>
+                            MFA требует не только пароль, но и временный код из приложения аутентификатора на вашем смартфоне. 
+                            Даже если кто-то узнает ваш пароль, без доступа к вашему телефону войти не получится.
+                        </p>
+                        <ul>
+                            <li><strong>TOTP:</strong> Одноразовые коды на основе времени</li>
+                            <li><strong>Обновление каждые 30 секунд</strong></li>
+                            <li><strong>Поддержка Google Authenticator, Authy, Microsoft Authenticator</strong></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <i class="fas fa-qrcode fa-5x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Шифрование -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4><i class="fas fa-lock"></i> Шифрование файлов</h4>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5>Защита данных на уровне файлов</h5>
+                        <p>
+                            Каждый загруженный файл автоматически шифруется с использованием криптографической библиотеки Fernet.
+                        </p>
+                        <ul>
+                            <li><strong>Алгоритм:</strong> AES-128 в режиме CBC</li>
+                            <li><strong>Аутентификация:</strong> HMAC для проверки целостности</li>
+                            <li><strong>Автоматическая генерация IV</strong></li>
+                            <li><strong>Расшифровка только при скачивании</strong></li>
+                        </ul>
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Важно:</strong> Файлы хранятся на диске в зашифрованном виде. Даже при физическом доступе 
+                            к серверу данные остаются защищенными.
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <i class="fas fa-file-shield fa-5x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ролевая модель -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4><i class="fas fa-users-cog"></i> Ролевая модель доступа (RBAC)</h4>
+            </div>
+            <div class="card-body">
+                <h5 class="mb-3">Три уровня ролей:</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Роль</th>
+                                <th>Разрешения</th>
+                                <th>Описание</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge bg-danger">Admin</span></td>
+                                <td>
+                                    <span class="badge bg-secondary">Все права</span>
+                                </td>
+                                <td>Полный доступ к системе, управление пользователями, удаление любых файлов</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-warning">Manager</span></td>
+                                <td>
+                                    <span class="badge bg-secondary">Загрузка</span>
+                                    <span class="badge bg-secondary">Скачивание</span>
+                                    <span class="badge bg-secondary">Предоставление доступа</span>
+                                </td>
+                                <td>Управление файлами и предоставление доступа другим пользователям</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-info">User</span></td>
+                                <td>
+                                    <span class="badge bg-secondary">Загрузка</span>
+                                    <span class="badge bg-secondary">Скачивание</span>
+                                </td>
+                                <td>Базовые права: загрузка и скачивание файлов</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Уровни доступа к файлам -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4><i class="fas fa-folder-open"></i> Уровни доступа к файлам</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="text-center p-3 border rounded">
+                            <i class="fas fa-user-lock fa-3x text-secondary mb-3"></i>
+                            <h5>Private</h5>
+                            <p>Только владелец или пользователи с явным доступом</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="text-center p-3 border rounded">
+                            <i class="fas fa-building fa-3x text-warning mb-3"></i>
+                            <h5>Department</h5>
+                            <p>Все пользователи того же отдела</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="text-center p-3 border rounded">
+                            <i class="fas fa-globe fa-3x text-success mb-3"></i>
+                            <h5>Public</h5>
+                            <p>Все пользователи системы</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Аудит -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4><i class="fas fa-clipboard-list"></i> Журнал аудита</h4>
+            </div>
+            <div class="card-body">
+                <p>
+                    Система автоматически фиксирует все действия пользователей:
+                </p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul>
+                            <li>Вход и выход из системы</li>
+                            <li>Загрузка и скачивание файлов</li>
+                            <li>Предоставление доступа</li>
+                            <li>Удаление файлов</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul>
+                            <li>Изменение профилей</li>
+                            <li>Настройка MFA</li>
+                            <li>IP-адреса запросов</li>
+                            <li>Временные метки действий</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="alert alert-success mt-3">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Соответствие стандартам:</strong> Журнал аудита помогает соответствовать требованиям 
+                    безопасности и проводить расследования инцидентов.
+                </div>
+            </div>
+        </div>
+
+
+        <div class="text-center mt-5">
+            {% if not current_user.is_authenticated %}
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg me-2">
+                <i class="fas fa-user-plus"></i> Зарегистрироваться
+            </a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-sign-in-alt"></i> Войти
+            </a>
+            {% else %}
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-tachometer-alt"></i> К панели управления
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+

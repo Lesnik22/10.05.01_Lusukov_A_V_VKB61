@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Инциденты безопасности - Админ панель{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <h2 class="mb-0"><i class="fas fa-exclamation-circle"></i> Инциденты безопасности</h2>
+            <div class="d-flex align-items-center gap-2">
+                <a href="{{ url_for('admin_panel') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Назад к админ панели
+                </a>
+                <span class="badge bg-danger">Администратор</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-exclamation-circle"></i> Инциденты</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Время</th>
+                                <th>Название</th>
+                                <th>Уровень</th>
+                                <th>Статус</th>
+                                <th>IP адрес</th>
+                                <th>Связанных событий</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for incident in incidents %}
+                            <tr class="{% if incident.severity == 'critical' %}table-danger{% elif incident.severity == 'high' %}table-warning{% endif %}">
+                                <td>{{ incident.created_at.strftime('%d.%m.%Y %H:%M:%S') }}</td>
+                                <td><strong>{{ incident.title }}</strong></td>
+                                <td>
+                                    <span class="badge bg-{% if incident.severity == 'critical' %}danger{% elif incident.severity == 'high' %}warning{% elif incident.severity == 'medium' %}info{% else %}secondary{% endif %}">
+                                        {{ incident.severity|upper if incident.severity else 'MEDIUM' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{% if incident.status == 'open' %}primary{% elif incident.status == 'investigating' %}warning{% elif incident.status == 'resolved' %}success{% else %}secondary{% endif %}">
+                                        {{ 'Открыт' if incident.status == 'open' else 'Расследуется' if incident.status == 'investigating' else 'Решен' if incident.status == 'resolved' else 'Закрыт' }}
+                                    </span>
+                                </td>
+                                <td><code>{{ incident.ip_address or '-' }}</code></td>
+                                <td>
+                                    {% if incident.related_events %}
+                                    {{ incident.related_events|fromjson|length }}
+                                    {% else %}
+                                    0
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-outline-info" onclick="viewIncident({{ incident.id }})">
+                                        <i class="fas fa-eye"></i> Просмотр
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                {% if not incidents %}
+                <div class="alert alert-info mb-0">
+                    <i class="fas fa-info-circle"></i> Инциденты не найдены
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

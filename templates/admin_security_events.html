@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}События безопасности - Админ панель{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <h2 class="mb-0"><i class="fas fa-shield-alt"></i> События безопасности</h2>
+            <div class="d-flex align-items-center gap-2">
+                <a href="{{ url_for('admin_panel') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Назад к админ панели
+                </a>
+                <span class="badge bg-danger">Администратор</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Фильтры -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-filter"></i> Фильтры и поиск</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="{{ url_for('admin_security_events') }}" id="filterForm">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="event_type" class="form-label">Тип события</label>
+                            <select class="form-select" id="event_type" name="event_type">
+                                <option value="">Все типы</option>
+                                <option value="suspicious_login" {% if request.args.get('event_type') == 'suspicious_login' %}selected{% endif %}>Подозрительный вход</option>
+                                <option value="virus_detected" {% if request.args.get('event_type') == 'virus_detected' %}selected{% endif %}>Обнаружен вирус</option>
+                                <option value="blocked_download" {% if request.args.get('event_type') == 'blocked_download' %}selected{% endif %}>Блокированная загрузка</option>
+                                <option value="security_alert" {% if request.args.get('event_type') == 'security_alert' %}selected{% endif %}>Алерт безопасности</option>
+                                <option value="admin_notification" {% if request.args.get('event_type') == 'admin_notification' %}selected{% endif %}>Уведомление админа</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="severity" class="form-label">Уровень</label>
+                            <select class="form-select" id="severity" name="severity">
+                                <option value="">Все уровни</option>
+                                <option value="low" {% if request.args.get('severity') == 'low' %}selected{% endif %}>Низкий</option>
+                                <option value="medium" {% if request.args.get('severity') == 'medium' %}selected{% endif %}>Средний</option>
+                                <option value="high" {% if request.args.get('severity') == 'high' %}selected{% endif %}>Высокий</option>
+                                <option value="critical" {% if request.args.get('severity') == 'critical' %}selected{% endif %}>Критический</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="status" class="form-label">Статус</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="">Все статусы</option>
+                                <option value="new" {% if request.args.get('status') == 'new' %}selected{% endif %}>Новое</option>
+                                <option value="acknowledged" {% if request.args.get('status') == 'acknowledged' %}selected{% endif %}>Принято</option>
+                                <option value="resolved" {% if request.args.get('status') == 'resolved' %}selected{% endif %}>Решено</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="date_from" class="form-label">С даты</label>
+                            <input type="date" class="form-control" id="date_from" name="date_from" value="{{ request.args.get('date_from', '') }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="date_to" class="form-label">По дату</label>
+                            <input type="date" class="form-control" id="date_to" name="date_to" value="{{ request.args.get('date_to', '') }}">
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search"></i> Поиск
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label for="search" class="form-label">Поиск по деталям</label>
+                            <input type="text" class="form-control" id="search" name="search" placeholder="Введите текст для поиска..." value="{{ request.args.get('search', '') }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="ip_address" class="form-label">IP адрес</label>
+                            <input type="text" class="form-control" id="ip_address" name="ip_address" placeholder="192.168.1.1" value="{{ request.args.get('ip_address', '') }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="user_id" class="form-label">Пользователь</label>
+                            <select class="form-select" id="user_id" name="user_id">
+                                <option value="">Все пользователи</option>
+                                {% for user in all_users %}
+                                <option value="{{ user.id }}" {% if request.args.get('user_id') == user.id|string %}selected{% endif %}>{{ user.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Статистика -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
+                <h5 class="card-title">{{ stats.total }}</h5>
+                <p class="card-text">Всего событий</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-exclamation-circle fa-2x text-danger mb-2"></i>
+                <h5 class="card-title">{{ stats.critical }}</h5>
+                <p class="card-text">Критических</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-clock fa-2x text-info mb-2"></i>
+                <h5 class="card-title">{{ stats.new }}</h5>
+                <p class="card-text">Новых</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                <h5 class="card-title">{{ stats.resolved }}</h5>
+                <p class="card-text">Решенных</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Таблица событий -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-shield-alt"></i> События безопасности</h5>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="exportEvents('csv')">
+                        <i class="fas fa-file-csv"></i> Экспорт CSV
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="exportEvents('json')">
+                        <i class="fas fa-file-code"></i> Экспорт JSON
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Время</th>
+                                <th>Тип</th>
+                                <th>Уровень</th>
+                                <th>Пользователь</th>
+                                <th>IP адрес</th>
+                                <th>Статус</th>
+                                <th>Детали</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for event in events %}
+                            <tr class="{% if event.severity == 'critical' %}table-danger{% elif event.severity == 'high' %}table-warning{% endif %}">
+                                <td>{{ event.created_at.strftime('%d.%m.%Y %H:%M:%S') }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ event.event_type }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{% if event.severity == 'critical' %}danger{% elif event.severity == 'high' %}warning{% elif event.severity == 'medium' %}info{% else %}secondary{% endif %}">
+                                        {{ event.severity|upper if event.severity else 'MEDIUM' }}
+                                    </span>
+                                </td>
+                                <td>{{ event.user.username if event.user else '-' }}</td>
+                                <td><code>{{ event.ip_address or '-' }}</code></td>
+                                <td>
+                                    <span class="badge bg-{% if event.status == 'new' %}primary{% elif event.status == 'acknowledged' %}warning{% else %}success{% endif %}">
+                                        {{ 'Новое' if event.status == 'new' else 'Принято' if event.status == 'acknowledged' else 'Решено' if event.status == 'resolved' else event.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <small>{{ event.details[:100] }}{% if event.details and event.details|length > 100 %}...{% endif %}</small>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        {% if event.status == 'new' %}
+                                        <button type="button" class="btn btn-outline-warning" onclick="acknowledgeEvent({{ event.id }})" title="Принять">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        {% endif %}
+                                        {% if event.status != 'resolved' %}
+                                        <button type="button" class="btn btn-outline-success" onclick="resolveEvent({{ event.id }})" title="Решить">
+                                            <i class="fas fa-check-double"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                {% if not events %}
+                <div class="alert alert-info mb-0">
+                    <i class="fas fa-info-circle"></i> События не найдены
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function acknowledgeEvent(eventId) {
+    fetch(`/admin/security/events/${eventId}/acknowledge`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'}
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Ошибка при выполнении действия');
+    });
+}
+
+function resolveEvent(eventId) {
+    fetch(`/admin/security/events/${eventId}/resolve`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'}
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Ошибка при выполнении действия');
+    });
+}
+
+function exportEvents(format) {
+    const params = new URLSearchParams(window.location.search);
+    params.set('export', format);
+    window.location.href = '{{ url_for("admin_security_events") }}?' + params.toString();
+}
+</script>
+{% endblock %}
+
+

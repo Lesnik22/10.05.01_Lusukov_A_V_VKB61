@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+
+{% block title %}Панель управления - Безопасная система обмена файлами{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+                <h2 class="mb-1"><i class="fas fa-tachometer-alt"></i> Панель управления</h2>
+                <small class="text-muted">Ваш личный центр файлов и безопасности</small>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <span class="badge bg-{{ 'success' if current_user.mfa_enabled else 'warning' }}">
+                    MFA: {{ 'Включен' if current_user.mfa_enabled else 'Отключен' }}
+                </span>
+                <span class="badge bg-info">{{ current_user.role.name|title }}</span>
+                {% if current_user.department %}
+                <span class="badge bg-secondary">
+                    <i class="fas fa-building"></i>
+                    {{ current_user.department.name }}
+                </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Верхний блок: загрузка файла + сводка -->
+<div class="row mb-4">
+    <div class="col-lg-6 mb-3 mb-lg-0">
+        <div class="card h-100">
+            <div class="card-header" style="padding: 0.5rem 1rem;">
+                <h5 class="mb-0" style="font-size: 1rem;"><i class="fas fa-upload"></i> Загрузить файл</h5>
+            </div>
+            <div class="card-body" style="padding: 0.75rem;">
+                <form method="POST" action="{{ url_for('upload_file') }}" enctype="multipart/form-data">
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <label for="file" class="form-label" style="font-size: 0.85rem; margin-bottom: 0.25rem;">Выберите файл</label>
+                                <input type="file" class="form-control form-control-sm" id="file" name="file" required>
+                                <div class="form-text" style="font-size: 0.7rem;">Максимальный размер: 100MB</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-2">
+                                <label for="access_level" class="form-label" style="font-size: 0.85rem; margin-bottom: 0.25rem;">Уровень доступа</label>
+                                <select class="form-select form-select-sm" id="access_level" name="access_level" onchange="toggleDepartment()">
+                                    <option value="private">Приватный</option>
+                                    <option value="department">Отдел</option>
+                                    <option value="public">Публичный</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-2">
+                                <label for="department" class="form-label" style="font-size: 0.85rem; margin-bottom: 0.25rem;">Отдел</label>
+                                <select class="form-select form-select-sm" id="department" name="department">
+                                    <option value="">Выберите отдел</option>
+                                    {% for dept in departments %}
+                                    <option value="{{ dept.name }}" {% if current_user.department and current_user.department.name == dept.name %}selected{% endif %}>{{ dept.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text" style="font-size: 0.7rem;">Требуется при "Отдел"</div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-primary mt-1">
+                        <i class="fas fa-upload"></i> Загрузить
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-shield-alt"></i> Безопасность и проверки</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3 text-center">
+                    <div class="col-4">
+                        <div class="text-success fs-4">{{ vt_stats.clean }}</div>
+                        <div class="text-muted small">Файлы без угроз</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-warning fs-4">{{ vt_stats.pending }}</div>
+                        <div class="text-muted small">В проверке</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-danger fs-4">{{ vt_stats.malicious }}</div>
+                        <div class="text-muted small">Заблокировано</div>
+                    </div>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fw-semibold">
+                            MFA: {{ 'включена' if current_user.mfa_enabled else 'отключена' }}
+                        </div>
+                        <small class="text-muted">
+                            Последний вход: {{ current_user.last_login.strftime('%d.%m.%Y %H:%M') if current_user.last_login else 'еще не входили' }}
+                        </small>
+                    </div>
+                    {% if not current_user.mfa_enabled %}
+                    <a href="{{ url_for('setup_mfa') }}" class="btn btn-sm btn-outline-primary">
+                        Включить MFA
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Мои файлы -->
+<div class="row mb-4" id="my-files">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-folder"></i> Мои файлы</h5>
+            </div>
+            <div class="card-body">
+                {% if user_files %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Имя файла</th>
+                                    <th>Размер</th>
+                                    <th>Тип</th>
+                                    <th>Доступ</th>
+                                    <th>Статус VT</th>
+                                    <th>Дата</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for file in user_files %}
+                                <tr>
+                                    <td>
+                                        <i class="fas fa-file"></i>
+                                        {{ file.original_filename }}
+                                    </td>
+                                    <td>{{ "%.2f"|format(file.file_size / 1024) }} KB</td>
+                                    <td>{{ file.mime_type }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if file.access_level == 'public' else 'warning' if file.access_level == 'department' else 'secondary' }}">
+                                            {{ file.access_level }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if file.vt_status == 'clean' %}
+                                            <span class="badge bg-success"><i class="fas fa-shield-check"></i> Безопасен</span>
+                                        {% elif file.vt_status == 'pending' %}
+                                            <span class="badge bg-warning"><i class="fas fa-spinner fa-spin"></i> В проверке</span>
+                                        {% elif file.vt_status == 'malicious' %}
+                                            <span class="badge bg-danger"><i class="fas fa-ban"></i> Заблокирован</span>
+                                        {% elif file.vt_status in ['failed', 'skipped', 'unscanned'] or not file.vt_status %}
+                                            <span class="badge bg-secondary"><i class="fas fa-question"></i> Не проверен</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ file.vt_status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ file.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                                    <td class="d-flex gap-1">
+                                        {% if file.vt_status == 'pending' %}
+                                            <button class="btn btn-sm btn-outline-secondary" disabled title="Файл проверяется VirusTotal">
+                                                <i class="fas fa-spinner fa-spin"></i>
+                                            </button>
+                                        {% elif file.vt_status == 'malicious' %}
+                                            <button class="btn btn-sm btn-outline-danger" disabled title="Файл заблокирован VirusTotal">
+                                                <i class="fas fa-ban"></i>
+                                            </button>
+                                        {% else %}
+                                            <a href="{{ url_for('download_file', file_id=file.id) }}" class="btn btn-sm btn-outline-primary" title="Скачать файл">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        {% endif %}
+                                        {% if current_user.role.has_permission('share_files') %}
+                                        <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#shareModal{{ file.id }}" title="Поделиться файлом">
+                                            <i class="fas fa-share"></i>
+                                        </button>
+                                        {% endif %}
+                                        <form method="POST" action="{{ url_for('delete_file', file_id=file.id) }}" onsubmit="return confirm('Удалить файл навсегда?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Удалить файл">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                        <small class="text-muted d-block">ID: {{ file.id }}</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">У вас пока нет загруженных файлов</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Доступные файлы -->
+{% if shared_files %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-share"></i> Файлы с доступом</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Имя файла</th>
+                                <th>Владелец</th>
+                                <th>Размер</th>
+                                <th>Статус VT</th>
+                                <th>Дата</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for file in shared_files %}
+                            <tr>
+                                <td>
+                                    <i class="fas fa-file"></i>
+                                    {{ file.original_filename }}
+                                </td>
+                                <td>{{ file.owner.username }}</td>
+                                <td>{{ "%.2f"|format(file.file_size / 1024) }} KB</td>
+                                <td>
+                                    {% if file.vt_status == 'clean' %}
+                                        <span class="badge bg-success"><i class="fas fa-shield-check"></i> Безопасен</span>
+                                    {% elif file.vt_status == 'pending' %}
+                                        <span class="badge bg-warning"><i class="fas fa-spinner fa-spin"></i> В проверке</span>
+                                    {% elif file.vt_status == 'malicious' %}
+                                        <span class="badge bg-danger"><i class="fas fa-ban"></i> Заблокирован</span>
+                                    {% elif file.vt_status in ['failed', 'skipped', 'unscanned'] or not file.vt_status %}
+                                        <span class="badge bg-secondary"><i class="fas fa-question"></i> Не проверен</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ file.vt_status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ file.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                                <td>
+                                    {% if file.vt_status == 'pending' %}
+                                        <button class="btn btn-sm btn-outline-secondary" disabled title="Файл проверяется VirusTotal">
+                                            <i class="fas fa-spinner fa-spin"></i>
+                                        </button>
+                                    {% elif file.vt_status == 'malicious' %}
+                                        <button class="btn btn-sm btn-outline-danger" disabled title="Файл заблокирован VirusTotal">
+                                            <i class="fas fa-ban"></i>
+                                        </button>
+                                    {% else %}
+                                        <a href="{{ url_for('download_file', file_id=file.id) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Модальные окна для предоставления доступа -->
+{% for file in user_files %}
+<div class="modal fade" id="shareModal{{ file.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Предоставить доступ к файлу</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('share_file', file_id=file.id) }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="username{{ file.id }}" class="form-label">Имя пользователя</label>
+                        <input type="text" class="form-control" id="username{{ file.id }}" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="permission{{ file.id }}" class="form-label">Разрешение</label>
+                        <select class="form-select" id="permission{{ file.id }}" name="permission">
+                            <option value="read">Только чтение</option>
+                            <option value="write">Чтение и запись</option>
+                            <option value="admin">Полный доступ</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Предоставить доступ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Проверка размера файла на клиентской стороне
+document.getElementById('file').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const maxSize = 100 * 1024 * 1024; // 100MB
+    
+    if (file && file.size > maxSize) {
+        alert('Файл слишком большой. Максимальный размер: 100MB');
+        e.target.value = '';
+    }
+});
+
+// Функция для включения/отключения поля отдела
+function toggleDepartment() {
+    const accessLevel = document.getElementById('access_level').value;
+    const departmentField = document.getElementById('department');
+    
+    if (accessLevel === 'department') {
+        departmentField.disabled = false;
+        departmentField.required = true;
+    } else {
+        departmentField.disabled = true;
+        departmentField.required = false;
+    }
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    toggleDepartment();
+});
+</script>
+{% endblock %}
+

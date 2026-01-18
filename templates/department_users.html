@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Пользователи отдела - Безопасная система обмена файлами{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2><i class="fas fa-users-cog"></i> Пользователи отдела: {{ department.name }}</h2>
+            <span class="badge bg-info">Руководитель отдела</span>
+        </div>
+        <p class="text-muted mb-0">Вы можете управлять только пользователями своего отдела и не можете изменять администраторов.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-users"></i> Сотрудники отдела</h5>
+            </div>
+            <div class="card-body">
+                {% if users %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Имя</th>
+                                <th>Email</th>
+                                <th>Роль</th>
+                                <th>MFA</th>
+                                <th>Статус</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'danger' if user.role.name == 'admin' else 'warning' if user.role.name == 'manager' else 'info' }}">
+                                        {{ user.role.name }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if user.mfa_enabled else 'secondary' }}">
+                                        {{ 'Да' if user.mfa_enabled else 'Нет' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if user.is_enabled and user.status == 'active' else 'danger' }}">
+                                        {{ 'Активен' if user.is_enabled and user.status == 'active' else 'Заблокирован' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if user.id == current_user.id %}
+                                        <span class="text-muted">Это вы</span>
+                                    {% elif user.role.name == 'admin' %}
+                                        <span class="text-muted">Администратор</span>
+                                    {% else %}
+                                        <form method="POST" action="{{ url_for('department_update_user', user_id=user.id) }}" class="d-flex flex-wrap gap-2">
+                                            <select class="form-select form-select-sm" name="role_id" style="max-width: 200px;">
+                                                {% for role in roles %}
+                                                {% if role.name != 'admin' %}
+                                                <option value="{{ role.id }}" {% if user.role_id == role.id %}selected{% endif %}>
+                                                    {{ role.name }}
+                                                </option>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="enabled{{ user.id }}" name="is_enabled" {% if user.is_enabled %}checked{% endif %}>
+                                                <label class="form-check-label" for="enabled{{ user.id }}">Активен</label>
+                                            </div>
+                                            <button type="submit" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-save"></i>
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{{ url_for('department_reset_mfa', user_id=user.id) }}" class="d-inline ms-1" onsubmit="return confirm('Сбросить MFA для пользователя {{ user.username }}?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-warning">
+                                                <i class="fas fa-key"></i> Сбросить MFA
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
+                    <p class="text-muted mb-0">В отделе пока нет пользователей.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+

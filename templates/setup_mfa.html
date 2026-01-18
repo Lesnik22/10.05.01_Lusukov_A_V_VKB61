@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Настройка MFA - Безопасная система обмена файлами{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header text-center">
+                <h4><i class="fas fa-key"></i> Настройка многофакторной аутентификации</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Инструкция:</strong> Отсканируйте QR-код в приложении аутентификатора или введите секретный ключ вручную.
+                </div>
+
+                <div class="text-center mb-4">
+                    <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="img-fluid" style="max-width: 200px;">
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Секретный ключ:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="{{ secret }}" readonly id="secretKey">
+                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard()">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ url_for('enable_mfa') }}">
+                    <div class="mb-3">
+                        <label for="token" class="form-label">Введите код из приложения аутентификатора:</label>
+                        <input type="text" class="form-control" id="token" name="token" 
+                               placeholder="000000" maxlength="6" required>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check"></i> Включить MFA
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-4">
+                    <h6>Рекомендуемые приложения:</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-mobile-alt text-primary me-2"></i> Google Authenticator</li>
+                        <li><i class="fas fa-mobile-alt text-primary me-2"></i> Authy</li>
+                        <li><i class="fas fa-mobile-alt text-primary me-2"></i> Microsoft Authenticator</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function copyToClipboard() {
+        const secretKey = document.getElementById('secretKey');
+        secretKey.select();
+        secretKey.setSelectionRange(0, 99999);
+        document.execCommand('copy');
+        
+        // Показываем уведомление
+        const button = event.target.closest('button');
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i>';
+        button.classList.remove('btn-outline-secondary');
+        button.classList.add('btn-success');
+        
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-secondary');
+        }, 2000);
+    }
+
+    // Автоматическая отправка формы при вводе 6 цифр
+    document.getElementById('token').addEventListener('input', function(e) {
+        if (e.target.value.length === 6) {
+            e.target.form.submit();
+        }
+    });
+</script>
+{% endblock %}
+

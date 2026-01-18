@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Главная - Безопасная система обмена файлами{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-primary">
+                <i class="fas fa-shield-alt"></i> SecureFile
+            </h1>
+            <p class="lead">Безопасная корпоративная система обмена файлами</p>
+            <p class="text-muted">Использует многофакторную аутентификацию (MFA) и ролевую модель доступа</p>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="fas fa-lock fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Безопасность</h5>
+                        <p class="card-text">Шифрование файлов и MFA для максимальной защиты данных</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="fas fa-users fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">Ролевая модель</h5>
+                        <p class="card-text">Гибкая система ролей и разрешений для контроля доступа</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="fas fa-file-shield fa-3x text-warning mb-3"></i>
+                        <h5 class="card-title">Аудит</h5>
+                        <p class="card-text">Полное логирование всех действий для соответствия требованиям</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-tachometer-alt"></i> Перейти в панель управления
+                </a>
+            {% else %}
+                <div class="d-grid gap-2 d-md-block">
+                    <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg me-2">
+                        <i class="fas fa-sign-in-alt"></i> Войти
+                    </a>
+                    <a href="{{ url_for('register') }}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-user-plus"></i> Регистрация
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="mt-5">
+            <h3 class="text-center mb-4">Возможности системы</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Многофакторная аутентификация (MFA)</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Шифрование файлов</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Ролевая модель доступа (RBAC)</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Контроль доступа к файлам</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Аудит всех действий</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Безопасный обмен файлами</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Управление пользователями</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Отчеты по безопасности</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+

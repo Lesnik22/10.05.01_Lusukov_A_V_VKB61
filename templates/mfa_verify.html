@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}MFA Проверка - Безопасная система обмена файлами{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card">
+            <div class="card-header text-center">
+                <h4><i class="fas fa-key"></i> Многофакторная аутентификация</h4>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-mobile-alt fa-3x text-primary"></i>
+                    <p class="mt-2">Введите код из приложения аутентификатора</p>
+                </div>
+                
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="token" class="form-label">Код MFA</label>
+                        <input type="text" class="form-control" id="token" name="token" 
+                               placeholder="000000" maxlength="6" required>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check"></i> Подтвердить
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="mt-3 text-center">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i>
+                        Используйте Google Authenticator, Authy или аналогичное приложение
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Автоматическая отправка формы при вводе 6 цифр
+    document.getElementById('token').addEventListener('input', function(e) {
+        if (e.target.value.length === 6) {
+            e.target.form.submit();
+        }
+    });
+</script>
+{% endblock %}
+
+
+
+
