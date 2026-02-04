@@ -13,7 +13,9 @@ python run.py
 ```
 
 ### 3. Открытие в браузере
-Перейдите по адресу: http://localhost:5000
+Перейдите по адресу:
+- HTTP: `http://127.0.0.1:5000` (если `ENABLE_TLS=0`)
+- HTTPS: `https://127.0.0.1:5000` (если `ENABLE_TLS=1`)
 
 ### 4. Вход в систему
 - **Логин**: `admin`
@@ -44,14 +46,31 @@ python run.py
    pip install -r requirements.txt
    ```
 
-3. **Настройте переменные окружения (опционально):**
+3. **Настройте `KEY.env` (обязательно):**
+   
+   Приложение загружает настройки из файла `KEY.env`. Минимально нужен `ENCRYPTION_KEY`,
+   иначе приложение не стартует.
+   
+   Пример `KEY.env`:
+   ```env
+   ENCRYPTION_KEY=<ваш_ключ_Fernet>
+   VT_API_KEY=<опционально>
+   ENABLE_TLS=1
+   TLS_CERT_PATH=certs/dev-cert.pem
+   TLS_KEY_PATH=certs/dev-key.pem
+   ```
+   
+   Генерация `ENCRYPTION_KEY`:
    ```bash
-   # Создайте файл .env
-   echo "SECRET_KEY=your-secret-key-here" > .env
-   echo "DATABASE_URL=sqlite:///secure_file_system.db" >> .env
+   python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
    ```
 
-4. **Запустите приложение:**
+4. **(Опционально) Генерация DEV-сертификата для HTTPS по IP:**
+   ```bash
+   python scripts/generate_dev_tls_cert.py --ip <ваш_ip>
+   ```
+
+5. **Запустите приложение:**
    ```bash
    python run.py
    ```
@@ -59,7 +78,7 @@ python run.py
 ## Первоначальная настройка
 
 ### 1. Вход в систему
-- Откройте http://localhost:5000
+- Откройте `http://127.0.0.1:5000` (если `ENABLE_TLS=0`) или `https://127.0.0.1:5000` (если `ENABLE_TLS=1`)
 - Войдите как администратор: `admin` / `admin123`
 
 ### 2. Настройка MFA
@@ -110,6 +129,12 @@ python run.py
 export PORT=5001
 python run.py
 ```
+
+### Долго загружается “первый экран” (LAN / без интернета)
+Интерфейс использует Bootstrap / FontAwesome. Если на клиенте нет доступа к CDN, загрузка может тормозить.
+Решения:
+- обеспечьте доступ в интернет, или
+- перенесите зависимости локально (офлайн-режим UI).
 
 ### Проблемы с правами доступа
 ```bash
