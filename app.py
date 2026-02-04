@@ -17,7 +17,7 @@ import json
 import hashlib
 from datetime import datetime, timedelta, timezone
 import secrets
-from cryptography.fernet import Fernet
+from gost_crypto import GOSTKuznyechik, generate_key as gost_generate_key, create_cipher
 import bcrypt
 from functools import wraps
 import requests
@@ -186,11 +186,13 @@ def update_session():
                 # В случае ошибки не блокируем пользователя
 
 # Загружаем мастер-ключ шифрования из конфигурации.
-# Ключ должен быть установлен через переменную окружения ENCRYPTION_KEY (base64 urlsafe 32 байта)
+# Ключ должен быть установлен через переменную окружения ENCRYPTION_KEY (base64 urlsafe 32 байта для ГОСТ)
 ENCRYPTION_MASTER_KEY = app.config.get('ENCRYPTION_KEY')
 if not ENCRYPTION_MASTER_KEY:
     raise RuntimeError("ENCRYPTION_KEY must be set in environment for persistent access to files")
-cipher_suite = Fernet(ENCRYPTION_MASTER_KEY)
+# Преобразуем ключ из Base64 и создаем объект ГОСТ "Кузнечик"
+master_key_bytes = GOSTKuznyechik.key_from_base64(ENCRYPTION_MASTER_KEY)
+cipher_suite = GOSTKuznyechik(master_key_bytes)
 
 
 def column_exists(table_name, column_name):
@@ -727,18 +729,20 @@ def deactivate_session(session_id):
 
 # Работа с ключами и шифрованием
 def generate_data_key():
-    """Создает одноразовый ключ для файла"""
-    return Fernet.generate_key()
+    """Создает одноразовый ключ для файла (ГОСТ 34.12-2015 Кузнечик)"""
+    return gost_generate_key()
 
 def wrap_data_key(data_key: bytes) -> bytes:
-    """Шифруем ключ файла мастер-ключом"""
+    """Шифруем ключ файла мастер-ключом (ГОСТ 34.12-2015 Кузнечик)"""
     return cipher_suite.encrypt(data_key)
 
 def unwrap_data_key(encrypted_key: bytes) -> bytes:
+    """Расшифровка ключа файла мастер-ключом (ГОСТ 34.12-2015 Кузнечик)"""
     return cipher_suite.decrypt(encrypted_key)
 
 def encrypt_file_with_key(file_path, data_key):
-    cipher = Fernet(data_key)
+    """Шифрование файла алгоритмом ГОСТ 34.12-2015 Кузнечик"""
+    cipher = GOSTKuznyechik(data_key)
     with open(file_path, 'rb') as file:
         file_data = file.read()
     encrypted_data = cipher.encrypt(file_data)
@@ -746,7 +750,8 @@ def encrypt_file_with_key(file_path, data_key):
         file.write(encrypted_data)
 
 def decrypt_file_with_key(file_path, data_key):
-    cipher = Fernet(data_key)
+    """Расшифровка файла алгоритмом ГОСТ 34.12-2015 Кузнечик"""
+    cipher = GOSTKuznyechik(data_key)
     try:
         with open(file_path, 'rb') as file:
             encrypted_data = file.read()
@@ -2549,5 +2554,32 @@ if __name__ == '__main__':
             correlate_security_events()
         except Exception as e:
             logging.warning(f"Ошибка корреляции событий при старте: {e}")
-    
-    app.run(debug=False, host='0.0.0.0', port=5000)
+
+    host = os.environ.get('HOST', '0.0.0.0')
+    port = int(os.environ.get('PORT', 5000))
+
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+
+    def resolve_path(path: str) -> str:
+        return path if os.path.isabs(path) else os.path.join(base_dir, path)
+
+    enable_tls = bool(app.config.get('ENABLE_TLS', False))
+    ssl_context = None
+    scheme = "http"
+    if enable_tls:
+        cert_path = resolve_path(app.config.get('TLS_CERT_PATH', os.path.join('certs', 'dev-cert.pem')))
+        key_path = resolve_path(app.config.get('TLS_KEY_PATH', os.path.join('certs', 'dev-key.pem')))
+        if os.path.exists(cert_path) and os.path.exists(key_path):
+            ssl_context = (cert_path, key_path)
+            scheme = "https"
+        else:
+            logging.error(
+                "ENABLE_TLS=1, но не найдены файлы сертификата/ключа: %s, %s",
+                cert_path,
+                key_path,
+            )
+            logging.error("Сгенерируйте DEV-сертификат: python scripts/generate_dev_tls_cert.py --ip <ваш_ip>")
+
+    print(f"Server starting on {scheme}://{host}:{port} (TLS={'on' if ssl_context else 'off'})")
+    # threaded=True важно: долгие операции (например VirusTotal) не должны "вешать" весь сайт
+    app.run(debug=False, host=host, port=port, ssl_context=ssl_context, threaded=True)
